@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sanchana — A reflective practice companion for Bharatanatyam dancers. Log sessions, track progress, and discover patterns with Viveka, your personal practice intelligence." />
+  <meta property="og:title" content="Sanchana — Practice Companion for Bharatanatyam" />
+  <meta property="og:description" content="Log sessions. Discover patterns. Grow with intention. Built for iOS by Darshini S P." />
+  <title>Sanchana — Practice Companion for Bharatanatyam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Tokens ───────────────────────────────────────────────── */
+    :root {
+      --bg:          #0c0404;
+      --bg-2:        #110606;
+      --bg-card:     #180a0a;
+      --bg-card-h:   #1e0d0d;
+      --gold:        #c8882a;
+      --gold-hi:     #e8a535;
+      --gold-lo:     #7a5218;
+      --gold-bd:     rgba(200,136,42,0.22);
+      --gold-glow:   rgba(200,136,42,0.07);
+      --text:        #f0dfc0;
+      --text-2:      #8a6e4a;
+      --text-3:      #4e3822;
+      --r-sm:  10px;
+      --r-md:  16px;
+      --r-lg:  28px;
+      --r-xl:  40px;
+    }
+
+    /* ─── Reset ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── Stars ─────────────────────────────────────────────────── */
+    #stars {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      animation: twinkle var(--d,4s) var(--dl,0s) infinite ease-in-out;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0; }
+      50%      { opacity: var(--op, 0.35); }
+    }
+
+    /* ─── Layout helpers ─────────────────────────────────────────── */
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+    .z1 { position: relative; z-index: 1; }
+
+    /* ─── Nav ────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      background: linear-gradient(to bottom, rgba(12,4,4,0.96) 0%, transparent 100%);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 400;
+      color: var(--gold-hi); letter-spacing: 0.14em;
+    }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-2); transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ─── Hero ───────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 7rem 2rem 4rem;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.45rem 1.25rem;
+      border: 1px solid var(--gold-bd); border-radius: 100px;
+      font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 2.5rem;
+    }
+    .hero-badge span { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
+    .om-symbol {
+      font-size: 1.8rem; color: var(--gold-lo);
+      letter-spacing: 0.1em; display: block; margin-bottom: 1.2rem;
+    }
+    h1.hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4rem, 9vw, 8rem);
+      font-weight: 300; line-height: 1;
+      color: var(--gold-hi); letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-style: italic; font-weight: 300;
+      color: var(--text-2); letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+    .divider {
+      width: 180px; height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-bd), transparent);
+      margin: 1.5rem auto;
+    }
+    .hero-body {
+      max-width: 540px; font-size: 0.95rem;
+      color: var(--text); opacity: 0.8; margin-bottom: 3rem;
+    }
+
+    /* ─── Phone trio ─────────────────────────────────────────────── */
+    .phone-trio {
+      display: flex; align-items: flex-end;
+      justify-content: center; gap: 1.5rem;
+      margin-top: 1rem; padding-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .phone-shell {
+      width: 200px; height: 410px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--gold-bd);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow:
+        0 24px 64px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(200,136,42,0.08),
+        inset 0 1px 0 rgba(200,136,42,0.12);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .phone-shell:nth-child(1) { transform: rotate(-5deg) translateY(30px); opacity: 0.85; }
+    .phone-shell:nth-child(2) { transform: translateY(0); z-index: 2; width: 215px; height: 440px; opacity: 1; }
+    .phone-shell:nth-child(3) { transform: rotate(5deg) translateY(30px); opacity: 0.85; }
+    .phone-shell img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .phone-ph {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.6rem; color: var(--text-3);
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      text-align: center; padding: 1rem;
+      text-transform: uppercase;
+    }
+    .phone-ph svg { opacity: 0.25; }
+
+    /* ─── Section shared ─────────────────────────────────────────── */
+    .section { padding: 7rem 0; position: relative; z-index: 1; }
+    .section-sep { border-top: 1px solid var(--gold-bd); }
+    .label {
+      font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--gold-lo); margin-bottom: 1rem;
+    }
+    .heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 400; color: var(--text);
+      line-height: 1.15; margin-bottom: 2rem;
+    }
+    .heading em { color: var(--gold-hi); font-style: italic; }
+    .prose {
+      font-size: 0.9rem; color: var(--text-2);
+      max-width: 640px; line-height: 1.95;
+    }
+    .prose + .prose { margin-top: 1.2rem; }
+    .prose em { color: var(--gold); font-style: italic; }
+
+    /* ─── Features grid ──────────────────────────────────────────── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--gold-bd);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      margin-top: 3.5rem;
+    }
+    .feat-card {
+      padding: 2.5rem 2rem;
+      background: var(--bg-card);
+      border-right: 1px solid var(--gold-bd);
+      border-bottom: 1px solid var(--gold-bd);
+      transition: background 0.3s;
+    }
+    .feat-card:hover { background: var(--bg-card-h); }
+    .feat-card:nth-child(3n) { border-right: none; }
+    .feat-card:nth-child(4), .feat-card:nth-child(5), .feat-card:nth-child(6) { border-bottom: none; }
+    .feat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem; font-weight: 300;
+      color: var(--gold-lo); opacity: 0.5;
+      line-height: 1; margin-bottom: 1.2rem;
+    }
+    .feat-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem; color: var(--gold-hi);
+      margin-bottom: 0.7rem; letter-spacing: 0.01em;
+    }
+    .feat-desc { font-size: 0.83rem; color: var(--text-2); line-height: 1.85; }
+
+    /* ─── Viveka spotlight ───────────────────────────────────────── */
+    .viveka-wrap {
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(24,10,10,0.9) 100%);
+      border: 1px solid var(--gold-bd);
+      border-radius: var(--r-lg); padding: 5rem 3rem;
+      max-width: 820px; margin: 3.5rem auto 0;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .viveka-wrap::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% -10%, rgba(200,136,42,0.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .viveka-wrap::after {
+      content: 'ॐ';
+      position: absolute; bottom: -1.5rem; right: 2rem;
+      font-size: 8rem; color: var(--gold-lo); opacity: 0.06;
+      font-family: serif; pointer-events: none;
+    }
+    .viveka-eyebrow {
+      font-size: 0.65rem; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.75rem;
+    }
+    .viveka-h {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 300; color: var(--text);
+      line-height: 1.25; margin-bottom: 2rem;
+    }
+    .viveka-body {
+      font-size: 0.88rem; color: var(--text-2);
+      max-width: 580px; margin: 0 auto 1.5rem;
+      line-height: 1.95;
+    }
+    .viveka-body em { color: var(--gold); font-style: italic; }
+    .pills {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 0.6rem;
+      margin-top: 2rem;
+    }
+    .pill {
+      padding: 0.35rem 1rem;
+      border: 1px solid var(--gold-bd); border-radius: 100px;
+      font-size: 0.72rem; color: var(--text-2); letter-spacing: 0.05em;
+    }
+
+    /* ─── Screenshots carousel ───────────────────────────────────── */
+    .screens-scroll {
+      display: flex; gap: 1.25rem;
+      overflow-x: auto; padding: 2.5rem 2rem 3rem;
+      scrollbar-width: thin; scrollbar-color: var(--gold-lo) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .screens-scroll::-webkit-scrollbar { height: 4px; }
+    .screens-scroll::-webkit-scrollbar-track { background: transparent; }
+    .screens-scroll::-webkit-scrollbar-thumb { background: var(--gold-lo); border-radius: 2px; }
+    .screen-item { flex-shrink: 0; text-align: center; }
+    .screen-frame {
+      width: 210px; height: 430px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--gold-bd);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+    }
+    .screen-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .screen-label {
+      margin-top: 0.9rem; font-size: 0.7rem;
+      color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* ─── Tech cards ─────────────────────────────────────────────── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem; margin-top: 3rem;
+    }
+    .tech-card {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-bd);
+      border-radius: var(--r-sm);
+      padding: 1.75rem 1.5rem;
+    }
+    .tech-label {
+      font-size: 0.62rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold-lo);
+      margin-bottom: 0.5rem;
+    }
+    .tech-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+    .tech-note { font-size: 0.78rem; color: var(--text-3); line-height: 1.5; }
+
+    /* ─── Future list ────────────────────────────────────────────── */
+    .future-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 3rem; }
+    .future-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1.2rem 1.5rem;
+      background: var(--bg-card); border: 1px solid var(--gold-bd);
+      border-radius: var(--r-sm);
+      font-size: 0.86rem; color: var(--text-2); line-height: 1.7;
+    }
+    .future-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--gold-lo); flex-shrink: 0; margin-top: 0.5rem;
+    }
+
+    /* ─── About strip ────────────────────────────────────────────── */
+    .about-inner { max-width: 640px; }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--gold-bd);
+      padding: 4rem 2rem 3rem;
+      text-align: center; position: relative; z-index: 1;
+    }
+    .footer-om { font-size: 1.5rem; color: var(--gold-lo); margin-bottom: 1.5rem; display: block; }
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; color: var(--text-2);
+      letter-spacing: 0.1em; margin-bottom: 0.5rem;
+    }
+    .footer-note { font-size: 0.7rem; color: var(--text-3); letter-spacing: 0.06em; line-height: 1.8; }
+
+    /* ─── Scroll reveal ──────────────────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.85s ease, transform 0.85s ease;
+    }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .feat-grid { grid-template-columns: repeat(2,1fr); }
+      .feat-card:nth-child(3n) { border-right: 1px solid var(--gold-bd); }
+      .feat-card:nth-child(2n) { border-right: none; }
+      .feat-card:nth-child(5), .feat-card:nth-child(6) { border-bottom: none; }
+      .feat-card:nth-child(4) { border-bottom: 1px solid var(--gold-bd); }
+    }
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      nav { padding: 1.2rem 1.5rem; }
+      .feat-grid { grid-template-columns: 1fr; }
+      .feat-card { border-right: none !important; }
+      .feat-card:last-child { border-bottom: none; }
+      .phone-trio { gap: 1rem; }
+      .phone-shell { width: 140px; height: 290px; }
+      .phone-shell:nth-child(2) { width: 155px; height: 315px; }
+      .viveka-wrap { padding: 3rem 1.5rem; }
+      .section { padding: 5rem 0; }
+      .tech-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .phone-trio { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; padding: 0 1rem; }
+      .tech-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars" aria-hidden="true"></div>
+
+<!-- Nav -->
+<nav>
+  <a href="#top" class="nav-logo">Sanchana</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#viveka">Viveka</a></li>
+    <li><a href="#screens">Screens</a></li>
+    <li><a href="#built">Built</a></li>
+    <li><a href="#future">Future</a></li>
+  </ul>
+</nav>
+
+<!-- ━━━ HERO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="hero z1" id="top">
+  <div class="hero-badge" aria-label="Platform info">
+    <span></span> iOS &nbsp;·&nbsp; SwiftUI &nbsp;·&nbsp; No data leaves device
+  </div>
+  <span class="om-symbol" aria-hidden="true">ॐ</span>
+  <h1 class="hero-title">Sanchana</h1>
+  <p class="hero-sub">A practice companion for Bharatanatyam dancers</p>
+  <div class="divider" aria-hidden="true"></div>
+  <p class="hero-body">
+    Log sessions. Discover patterns. Grow with intention.<br>
+    A reflective intelligence system designed from <em style="color:var(--gold);font-style:italic;">within the culture</em> of the practice itself — not imposed upon it.
+  </p>
+
+  <!-- Phone trio — replace phone-ph divs with <img> tags pointing to your screenshots -->
+  <div class="phone-trio" aria-label="App screenshots">
+
+    <div class="phone-shell">
+      <img src="screenshots/home.png" alt="Sanchana home screen showing streak, last session and Viveka suggestion">
+    </div>
+
+    <div class="phone-shell">
+      <img src="screenshots/insights.png" alt="Insights screen showing practice volume, quality score and consistency">
+    </div>
+
+    <div class="phone-shell">
+      <img src="screenshots/viveka-observations.png" alt="Viveka practice intelligence showing observations and quality trend">
+    </div>
+
+  </div>
+</section>
+
+<!-- ━━━ PROBLEM ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="problem">
+  <div class="container">
+    <p class="label reveal">The problem</p>
+    <h2 class="heading reveal">Bharatanatyam students<br>lack <em>reflective structure</em></h2>
+    <p class="prose reveal">
+      Bharatanatyam is not a skill acquired in a straight line. It is a tradition accumulated over years
+      through repetition, reflection, and patient attentiveness to one's own development. The students
+      who grow are often the ones aware not just of <em>how much</em> they practise, but of <em>how and when</em>.
+    </p>
+    <p class="prose reveal">
+      Over nine years within the Bharatanatyam community, this lack of reflective structure proved
+      extremely common across students of all ages and experience levels. Growth is often felt
+      emotionally but rarely examined systematically.
+    </p>
+    <p class="prose reveal">
+      Existing tools do not meaningfully support this form of practice. Generic habit trackers, fitness
+      apps, and productivity timers are designed around repetition and output. Bharatanatyam carries its
+      own vocabulary, pedagogy, emotional rhythms, and long-term progression structure. Treating it like
+      a generic productivity activity strips away much of what makes the practice meaningful.
+    </p>
+    <p class="prose reveal" style="margin-top:2.5rem; font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-style:italic; color:var(--text); opacity:0.9; max-width:520px;">
+      "Sanchana was born from the idea that Bharatanatyam students deserve a system designed from within the culture of the practice itself."
+    </p>
+  </div>
+</section>
+
+<!-- ━━━ FEATURES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section z1" id="features">
+  <div class="container">
+    <p class="label reveal">What it does</p>
+    <h2 class="heading reveal">Built around how<br><em>dance training actually works</em></h2>
+
+    <div class="feat-grid reveal">
+
+      <div class="feat-card">
+        <div class="feat-num">01</div>
+        <div class="feat-title">Practice Logging</div>
+        <p class="feat-desc">
+          Log each session with the composition practised, duration, a quality self-rating from 1–5,
+          and free-text reflections. Transform practice from something temporary into something
+          reviewable — gaining visibility into patterns across months.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-num">02</div>
+        <div class="feat-title">Calendar View</div>
+        <p class="feat-desc">
+          A spatial representation of practice history through colour-coded indicators and
+          date-specific entries. Visualise effort across entire months so accumulated consistency
+          is never psychologically invisible.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-num">03</div>
+        <div class="feat-title">Goal Tracking</div>
+        <p class="feat-desc">
+          Goals represented visually through dated milestones and progress pathways. Connect
+          daily practice with longer-term artistic progression and maintain a clear sense of
+          direction and momentum toward performances and examinations.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-num">04</div>
+        <div class="feat-title">Viveka Intelligence</div>
+        <p class="feat-desc">
+          A reflective intelligence layer — not a recommendation engine — that analyses long-term
+          behavioural patterns across practice history and quietly surfaces observations that
+          students may not notice themselves.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-num">05</div>
+        <div class="feat-title">Sentiment Analysis</div>
+        <p class="feat-desc">
+          On-device NaturalLanguage analysis across practice reflections. When patterns across
+          sessions consistently reflect positive or negative emotional tone, Viveka surfaces those
+          observations. All analysis stays entirely on-device — always.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-num">06</div>
+        <div class="feat-title">Practice Reports</div>
+        <p class="feat-desc">
+          Periodic reports synthesise raw session data into readable summaries — activity trends,
+          composition breakdowns, quality averages, and narrative observations composed by Viveka
+          from the student's own history.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ VIVEKA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="viveka">
+  <div class="container" style="text-align:center;">
+    <p class="label reveal">Practice intelligence</p>
+    <h2 class="heading reveal" style="margin:0 auto 0;">Introducing <em>Viveka</em></h2>
+    <div class="viveka-wrap reveal">
+      <p class="viveka-eyebrow">V I V E K A &nbsp;·&nbsp; ॐ &nbsp;·&nbsp; Your practice intelligence</p>
+      <h3 class="viveka-h">Designed to observe,<br>not to instruct.</h3>
+      <div class="divider"></div>
+      <p class="viveka-body">
+        Early versions of Viveka generated direct recommendations — more practice, less practice, focus
+        on specific compositions. These were removed. Students already receive instruction, correction,
+        and direction from teachers. Repeating information the student already knows adds little value.
+      </p>
+      <p class="viveka-body">
+        The more meaningful gap within the community was not a lack of instruction, but a lack of
+        <em>reflective visibility</em>. Viveka was redesigned as a companion intelligence layer that
+        highlights overlooked behavioural patterns, contextualises progress, and quietly surfaces
+        information users may not notice themselves.
+      </p>
+      <p class="viveka-body">
+        Reflection still belongs to the student. The intelligence layer exists only to support awareness —
+        never to replace agency.
+      </p>
+      <div class="pills">
+        <span class="pill">Consistency Rhythms</span>
+        <span class="pill">Burnout Detection</span>
+        <span class="pill">Quality Arcs</span>
+        <span class="pill">Goal Feasibility</span>
+        <span class="pill">Sentiment Trends</span>
+        <span class="pill">Cross-Pattern Analysis</span>
+        <span class="pill">Milestone Projection</span>
+        <span class="pill">Weekly Recaps</span>
+        <span class="pill">Best Practice Days</span>
+        <span class="pill">Recovery Patterns</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ SCREENSHOTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="screens">
+  <div class="container">
+    <p class="label reveal">App screens</p>
+    <h2 class="heading reveal">Every screen, <em>considered</em></h2>
+    <p class="prose reveal">
+      Warm tones inspired by Bharatanatyam performance environments and traditional costume
+      palettes. Every design choice reinforces the app's role as a reflective companion — not
+      a generic productivity tool.
+    </p>
+  </div>
+
+  <div class="screens-scroll">
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/home.png" alt="Home screen">
+      </div>
+      <p class="screen-label">Home</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/calendar.png" alt="Calendar view">
+      </div>
+      <p class="screen-label">Calendar</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/log.png" alt="Log a session">
+      </div>
+      <p class="screen-label">Log Session</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/insights.png" alt="Insights overview">
+      </div>
+      <p class="screen-label">Insights</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/progress.png" alt="Practice summary">
+      </div>
+      <p class="screen-label">Practice Summary</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/goals.png" alt="Goals and upcoming milestones">
+      </div>
+      <p class="screen-label">Goals</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/viveka-observations.png" alt="Viveka observations">
+      </div>
+      <p class="screen-label">Viveka · Observations</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/viveka-quality.png" alt="Viveka quality arcs and patterns">
+      </div>
+      <p class="screen-label">Viveka · Quality Arcs</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/viveka-upcoming.png" alt="Viveka coming up and weekly recap">
+      </div>
+      <p class="screen-label">Viveka · Coming Up</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/viveka-burnout.png" alt="Viveka burnout warning and goal feasibility">
+      </div>
+      <p class="screen-label">Viveka · Burnout Warning</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/viveka-goals.png" alt="Viveka goal feasibility">
+      </div>
+      <p class="screen-label">Viveka · Goal Feasibility</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/report-picker.png" alt="Practice report date picker">
+      </div>
+      <p class="screen-label">Report · Date Range</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/report.png" alt="Full practice report">
+      </div>
+      <p class="screen-label">Practice Report</p>
+    </div>
+
+    <div class="screen-item">
+      <div class="screen-frame">
+        <img src="screenshots/report-highlights.png" alt="Report highlights and Viveka's reading">
+      </div>
+      <p class="screen-label">Report · Viveka's Reading</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ━━━ HOW IT'S BUILT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="built">
+  <div class="container">
+    <p class="label reveal">How it's built</p>
+    <h2 class="heading reveal">Native, private,<br><em>intentionally simple</em></h2>
+    <p class="prose reveal">
+      A native iOS app written entirely in SwiftUI with no external dependencies. Every architectural
+      decision prioritises privacy, reliability, and proportional complexity — using the right tool for the
+      actual problem, not the impressive one.
+    </p>
+
+    <div class="tech-grid reveal">
+      <div class="tech-card">
+        <div class="tech-label">Language & UI</div>
+        <div class="tech-value">SwiftUI</div>
+        <div class="tech-note">Native iOS, no external frameworks or dependencies</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Architecture</div>
+        <div class="tech-value">Single Source of Truth</div>
+        <div class="tech-note">Shared AppState object across all views — no state desynchronisation</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Persistence</div>
+        <div class="tech-value">UserDefaults + JSON</div>
+        <div class="tech-note">Versioned stores with schema migration paths for future changes</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Analytics Engine</div>
+        <div class="tech-value">Pure Functional</div>
+        <div class="tech-note">ReportEngine decoupled from UI — data in, structured report out</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Intelligence</div>
+        <div class="tech-value">Algorithmic</div>
+        <div class="tech-note">Derived entirely from the student's own history — no population benchmarking</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Sentiment</div>
+        <div class="tech-value">Apple NLTagger</div>
+        <div class="tech-note">On-device · 15-word minimum threshold for stability</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Privacy</div>
+        <div class="tech-value">No data leaves device</div>
+        <div class="tech-note">No server · no API key · no analytics · no cloud processing</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-label">Accessibility</div>
+        <div class="tech-value">Fully considered</div>
+        <div class="tech-note">Font scaling, reminder notifications, calendar customisation for intergenerational use</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ HONEST SHORTCOMINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="tradeoffs">
+  <div class="container">
+    <p class="label reveal">Design decisions & honest shortcomings</p>
+    <h2 class="heading reveal">Proportional engineering<br><em>over technological complexity</em></h2>
+    <p class="prose reveal">
+      Every trade-off in Sanchana was made deliberately. CoreData was evaluated and rejected — the
+      data is single-device, structurally simple, and lightweight enough that a relational database would
+      introduce complexity without benefit. No external ML library was introduced because Apple's
+      NaturalLanguage framework runs entirely on-device, preserving the privacy-sensitive nature of
+      reflective practice writing.
+    </p>
+    <p class="prose reveal">
+      Known limitations include universal burnout thresholds that may not perfectly reflect individual
+      norms, session duration as a proxy for quality rather than a direct measure, and short remarks
+      under 15 words being excluded from sentiment analysis for reliability. Each limitation is documented,
+      understood, and accepted as the most proportional solution at the current scale.
+    </p>
+  </div>
+</section>
+
+<!-- ━━━ FUTURE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="future">
+  <div class="container">
+    <p class="label reveal">Future directions</p>
+    <h2 class="heading reveal">Where Sanchana <em>is going</em></h2>
+
+    <div class="future-list reveal">
+      <div class="future-item"><div class="future-dot"></div>iCloud synchronisation so practice histories persist seamlessly across device changes while maintaining full user ownership of data</div>
+      <div class="future-item"><div class="future-dot"></div>Expansion into adjacent classical traditions — Odissi, Kuchipudi, and Carnatic music practice — through modular vocabulary and pedagogy systems</div>
+      <div class="future-item"><div class="future-dot"></div>Personalised behavioural thresholds within Viveka derived from each student's long-term baseline rather than universal constants</div>
+      <div class="future-item"><div class="future-dot"></div>Context-aware sentiment modelling trained specifically around reflective artistic practice language — understanding the vocabulary of classical dance</div>
+      <div class="future-item"><div class="future-dot"></div>Cross-pattern reasoning identifying nuanced relationships between consistency, emotional state, recovery cycles, and long-term artistic progression</div>
+      <div class="future-item"><div class="future-dot"></div>Explainable intelligence systems where users can inspect how observations were derived rather than receiving opaque conclusions</div>
+      <div class="future-item"><div class="future-dot"></div>Local-first encrypted persistence architectures that preserve privacy while supporting richer historical analytics</div>
+      <div class="future-item"><div class="future-dot"></div>Longitudinal reflection modelling capable of identifying subtle changes in confidence, motivation, and artistic growth across multi-year practice histories</div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ ABOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<section class="section section-sep z1" id="about">
+  <div class="container">
+    <div class="about-inner">
+      <p class="label reveal">About</p>
+      <h2 class="heading reveal">Built from <em>within<br>the community</em></h2>
+      <p class="prose reveal">
+        Sanchana emerged from nine years within the Bharatanatyam community — observing a practice
+        community whose workflows are rarely considered within mainstream software design. The absence
+        of reflective systems for Indian classical arts practitioners highlighted how many technologies are
+        implicitly designed around more visible or commercially prioritised communities.
+      </p>
+      <p class="prose reveal">
+        Designing from the realities of this community rather than from a generic feature template
+        shaped every architectural and interaction decision within the project. The hardest part of
+        building an intelligent system is deciding what information deserves interpretation and what
+        should remain under the user's control.
+      </p>
+      <p class="prose reveal">
+        Built with SwiftUI and Apple's NaturalLanguage framework. No external dependencies.
+        No data leaves the device.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━ FOOTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<footer>
+  <span class="footer-om" aria-hidden="true">ॐ</span>
+  <div class="footer-name">Darshini S P</div>
+  <p class="footer-note">
+    Sanchana &nbsp;·&nbsp; A practice companion for Bharatanatyam dancers &nbsp;·&nbsp; iOS<br>
+    Built with SwiftUI &nbsp;·&nbsp; Apple NaturalLanguage framework &nbsp;·&nbsp; No external dependencies
+  </p>
+</footer>
+
+<script>
+  /* ── Stars ── */
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 1.8 + 0.4;
+    s.style.cssText =
+      `width:${sz}px;height:${sz}px;` +
+      `left:${Math.random()*100}%;top:${Math.random()*100}%;` +
+      `--d:${(Math.random()*7+3).toFixed(1)}s;` +
+      `--dl:${(Math.random()*6).toFixed(1)}s;` +
+      `--op:${(Math.random()*0.45+0.1).toFixed(2)};`;
+    starsEl.appendChild(s);
+  }
+
+  /* ── Scroll reveal ── */
+  const io = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ── Staggered children inside .feat-grid & .future-list ── */
+  document.querySelectorAll('.feat-grid.in .feat-card, .future-list.in .future-item').forEach((el, i) => {
+    el.style.transitionDelay = `${i * 0.07}s`;
+  });
+</script>
+</body>
+</html>
